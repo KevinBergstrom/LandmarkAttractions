@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Landmark Attractions</title>
+		<center>
+			<h1>Landmark Attractions</h1>
+		</center>
+	</head>
+
+	<body>
+
+		<form method="get" action="{{ url_for('results') }}">
+			<center>
+				<div>
+					<label for="searchterm">Query:</label>
+					<input type="text" name="searchterm" />
+					<input type="submit" value="Search" /><br />
+				</div>
+			</center>
+
+<br /><br />
+			<center>
+				<div>
+
+					<label for="range">Range in miles from current location:</label>
+					<!--default range is 200 miles-->
+					<input type="text" name="range" value="200"/><br />
+
+					<div>
+						<p>Type</p>
+						<input type="radio" name="type" value="Any" checked> Any
+						<input type="radio" name="type" value="Bridge"> Bridge
+						<input type="radio" name="type" value="Building"> Building
+						<input type="radio" name="type" value="Mountain"> Mountain
+					</div>
+				</div>
+			</center>
+			
+			<input type="hidden" name="page" value = "1"/>
+			<!--default location is WSU vancouver-->
+			<input type="hidden" id="latitude" name="latitude" value = "45.731111"/>
+			<input type="hidden" id="longitude" name="longitude" value = "-122.636944"/>
+
+		</form>	
+
+	<script>
+
+		function handlePosition(lat,lon){
+			document.getElementById("latitude").value = lat;
+			document.getElementById("longitude").value = lon;
+		}
+
+		if("geolocation" in navigator){
+			var loc = navigator.geolocation.getCurrentPosition(function(pos){
+				handlePosition(pos.coords.latitude, pos.coords.longitude);
+			});
+		}
+
+	</script>
+
+	</body>	
+</html>

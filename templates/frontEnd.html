@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Landmark Attractions</title>
+<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin=""></script>
+
+</head>
+<body>
+
+<!-- create results -->
+<div style = "float:left">
+
+        <div style = "height:400px;width:500px;border:1px solid black;overflow-x:hidden;overflow-y:scroll">
+            {% for n, s, loc, lon, lat, i, t, d, di in results %}
+            <div style = "  border: 1px solid black; background-color: white;padding-top: 10px;padding-right: 10px;padding-bottom: 10px;padding-left: 10px;">
+
+                <p>{{n}}</p>
+
+                <div>
+                    <img src="{{i}}" alt="{{n}}" style = "max-width: 50%; max-height: 160px;float:right">
+                </div>
+
+                <p>Type: {{t}}</p>
+                <p>Location: {{loc}}</p>
+                <p>Latitude: {{lon}} | Longitude: {{lat}}</p>
+                <p>{{di}} miles away</p>
+
+                <button id="open{{n}}">Learn More</button>
+
+            </div>
+            {% endfor %}
+        </div>
+</div>
+
+</div>
+
+<!-- create modals -->
+{% for n, s, loc, lon, lat, i, t, d, di in results %}
+<div id="modal{{n}}" class="modal" style ="display:none;left: 0;top: 0;position:fixed;z-index: 2000;width: 100%;height: 100%;
+    overflow: auto;background-color: white;background-color: rgba(0,0,0,0.5);">
+
+  <div style = "margin: 15% auto;background-color: white;
+    margin: auto;padding: 20px;border: 1px solid #888;width: 80%;">
+    <button id="close{{n}}">Close</button>
+
+        <p>{{n}}</p>
+
+        <div>
+            <img src="{{i}}" alt="{{n}}" style = "max-width: 50%; max-height: 100%;">
+        </div>
+        <p>Type: {{t}}</p>
+        <p>Size: {{s}}</p>
+        <p>Location: {{loc}}</p>
+        <p>Latitude: {{lon}} | Longitude: {{lat}}</p>
+        <p>{{di}} miles away</p>
+        <p>{{d}}</p>
+    </div>
+
+</div>
+
+{% endfor %}
+
+
+<div style = "clear:right">
+<!-- create map -->
+<div id="mapid" style="border:1px solid black;width: 500px; height: 400px;"></div>
+
+</div>
+
+<!-- create search setting stuff -->
+<br />
+
+    <div style = "float:left">
+        <form method="get" action="{{ url_for('results') }}">
+            <input id = "prevBtn" type="submit" value="Previous Page" />
+            <input type="hidden" name="searchterm" value = "{{searchterm}}"/>
+            <input type="hidden" name="range" value = "{{range}}"/>
+            <input type="hidden" name="page" value = "{{page-1}}"/>
+            <input type="hidden" name="type" value="{{type}}">
+            <input type="hidden" id="latitude" name="latitude" value = "{{latitude}}"/>
+            <input type="hidden" id="longitude" name="longitude" value = "{{longitude}}"/>
+        </form>
+        <p>Page: {{page}} of {{maxPage}}</p>
+        <p>Showing {{resultAmount}} of {{maxResults}} results</p>
+        <form method="get" action="{{ url_for('results') }}">
+            <input id = "nextBtn" type="submit" value="Next Page" />
+            <input type="hidden" name="searchterm" value = "{{searchterm}}"/>
+            <input type="hidden" name="range" value = "{{range}}"/>
+            <input type="hidden" name="page" value = "{{page+1}}"/>
+            <input type="hidden" name="type" value="{{type}}">
+            <input type="hidden" id="latitude" name="latitude" value = "{{latitude}}"/>
+            <input type="hidden" id="longitude" name="longitude" value = "{{longitude}}"/>
+        </form>
+    </div>
+
+
+
+    <form method="get" action="{{ url_for('results') }}">
+        <div style = "float:left">
+                <label for="searchterm">Query:</label>
+                <input type="text" name="searchterm" value="{{searchterm}}"/>
+                <input type="submit" value="Search" />
+
+
+                <label for="range">Range in miles from current location:</label>
+                <input type="text" name="range" value="{{range}}"/>
+                <br />
+                <div style = "float:right">
+                    <p>  Type</p>
+                    <input id = "btnAny" type="radio" name="type" value="Any" checked> Any
+                    <input id = "btnBridge" type="radio" name="type" value="Bridge"> Bridge
+                    <input id = "btnBuilding" type="radio" name="type" value="Building"> Building
+                    <input id = "btnMountain" type="radio" name="type" value="Mountain"> Mountain
+                </div>
+            
+            <input type="hidden" name="page" value = "1"/>
+            <input type="hidden" id="latitude" name="latitude" value = "{{latitude}}"/>
+            <input type="hidden" id="longitude" name="longitude" value = "{{longitude}}"/>
+        </div>
+
+    </form> 
+
+<script>
+
+    var prevBtn = document.getElementById("prevBtn")
+    var nextBtn = document.getElementById("nextBtn")
+
+    //hide buttons
+    if({{page-1}}<=0){
+        prevBtn.parentNode.removeChild(prevBtn)
+    }
+
+    if({{page+1}}>{{maxPage}}){
+        nextBtn.parentNode.removeChild(nextBtn)
+    }
+
+    var optionBtn = document.getElementById("btn{{type}}")
+    optionBtn.click()
+
+    var y = {{latitude}};
+    var x = {{longitude}};
+
+    var mymap = L.map('mapid').setView([y, x], 9);
+
+	var layer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		id: 'mapbox.streets'
+	})
+
+    layer.addTo(mymap);
+
+    var markerDict = {};
+
+    function moveToMarker(name){
+        if(markerDict[name]!==null){
+            mymap.panTo(markerDict[name].getLatLng());
+        }
+    }
+
+    function openModal(name){
+        var currentModal = document.getElementById("modal"+name)
+        currentModal.style.display = "block";
+        moveToMarker(name);
+    }
+
+    function closeModal(name){
+        var currentModal = document.getElementById("modal"+name)
+        currentModal.style.display = "none";
+    }
+
+    {% for n, s, loc, lon, lat, i, t, d,di in results %}
+        //connect buttons to modals
+        var currentClose = document.getElementById("close{{n}}")
+        var currentButton = document.getElementById("open{{n}}")
+
+        currentButton.onclick = function(){
+            openModal("{{n}}");
+        }
+        currentClose.onclick = function(){
+            closeModal("{{n}}");
+        }
+
+        //plot markers on the map
+        var latitude = degreesMinutesSecondsToDec('{{lat}}')
+        var longitude = degreesMinutesSecondsToDec('{{lon}}')
+        if(latitude!==null && longitude !== null){
+            var marky = L.marker([longitude, latitude]).addTo(mymap)
+            .bindTooltip("{{n}}");
+            marky.on('click', clickedMarker);
+            markerDict["{{n}}"] = marky;
+        }
+    {% endfor %}
+
+    function clickedMarker(event){
+        var markerName = this._tooltip.getContent()
+        openModal(markerName)
+    }
+
+    function degreesMinutesSecondsToDec(dms){
+
+        if(dms.match(/\d+″/)==null){
+            return null
+        }
+
+        var degrees = parseInt(dms.match(/\d+/)[0],10)
+        var minutes = parseInt(dms.match(/°\d+/)[0].replace("°",""),10)
+        var seconds = parseInt(dms.match(/′\d+/)[0].replace("′",""),10)
+        var dd = degrees + minutes/60 + seconds/3600
+
+        if(dms.includes("W")){
+            dd = -1*dd
+        }
+        if(dms.includes("S")){
+            dd = -1*dd
+        }
+
+        return dd
+    }
+
+</script>
+
+</body>
+</html> 

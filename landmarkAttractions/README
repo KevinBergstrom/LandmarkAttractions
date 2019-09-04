@@ -1,0 +1,41 @@
+Landmark Attractions
+by Team Googleplex
+
+Overview:
+	landmarkAttractions.py queries fullDatabase.csv for
+	searches related to landmarks and uses frontEnd.html
+	to display results of the search
+
+How to run:
+	1. Making sure fullDatabase.csv is populated 
+	-To run this scraper: python3 fullScraper.py
+		NOTICE: This scraper takes a long time, if the scraper keeps failing before fullDatabase.csv is fully populated: set STARTNEW = False on line 10 in fullScraper.py and run fullScraper.py again. This will continue scraping from where you last left off. Keep running fullScraper.py until the database is poulated
+
+	2. Running the server
+	(Whoosh and Flask must be installed)
+	-To run this program: FLASK_APP=landmarkAttractions.py flask run
+
+	3. Accessing the website
+	NOTICE: I tested the website in firefox, you may have to stretch the window to
+	fit all of the components into the screen
+	-While the server is running go to http://127.0.0.1:5000/
+	
+Other information:
+
+	Files:
+	README					pertinent Information
+	fullDatabase.csv		csv database containing landmarks
+	fullScraper.py 			Python code to populate mountainDatabase.csv
+	landmarkAttractions.py  Python code to connect the webpages to the database
+	Back_End				folder containing auto generated files from the search
+	static					folder containing static files used by landmarkAttractions.py
+	static/noImage.png		used by landmarkAttractions.py to denote a missing image
+	templates				folder containing html template files used by landmarkAttractions.py
+	templates/homePage.html used by landmarkAttractions.py to display the home page
+	templates/frontEnd.html used by landmarkAttractions.py to display search results page
+
+
+
+
+
+
